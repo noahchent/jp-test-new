@@ -1,0 +1,26 @@
+jdbc_url=jdbc:mysql://192.168.10.219:3306/ad_new?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&&autoReconnect=true
+jdbc_username=aduser
+jdbc_password=123456
+jdbc_filters=stat,config,wall
+#<!-- 最大并发连接数 -->
+jdbc_maxActive=200
+#<!-- 初始化连接数量 -->
+jdbc_initialSize=15
+#获取连接时最大等待时间，单位毫秒
+jdbc_maxWait=60000
+#<!-- 最小空闲连接数 -->
+jdbc_minIdle=1
+#<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+jdbc_timeBetweenEvictionRunsMillis=3600000
+#<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+jdbc_minEvictableIdleTimeMillis=300000
+#<!-- 用来检测连接是否有效的sql，要求是一个查询语句 -->
+jdbc_validationQuery=select 'x'
+#<!-- 申请连接的时候检测 -->
+jdbc_testWhileIdle=true
+#<!-- 申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+jdbc_testOnBorrow=false
+#<!-- 归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+jdbc_testOnReturn=false
+jdbc_poolPreparedStatements=true
+jdbc_maxPoolPreparedStatementPerConnectionSize=20

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vyin.baidu.mapper.AdSlotsMapper">
+
+	<select id="getAdSlotInfoBySlotId" parameterType="java.lang.String" resultType="com.vyin.baidu.bean.AdSlots">
+		select
+			a.id id,
+			tam.term_id termId, 
+			a.slot_mssp_id slotMsspId,
+			a.slot_type slotType,
+			a.slot_resolution_width slotResolutionWidth,
+			a.slot_resolution_height slotResolutionHeight,
+			a.uv ,
+			a.pv ,
+			a.material_type materialType,
+			a.voice_support voiceSupport,
+			a.ad_flag_status adFlagStatus,
+			a.format ,
+			a.material_max_size materialMaxSize,
+			a.show_type showType,
+			a.show_type_details showTypeDetails,
+			a.daily_show_times dailyShowTimes,
+			a.show_duration showDuration,
+			a.price ,
+			a.create_time createTime,
+			a.update_time updateTime
+		from
+			ad_slots a left join terminals_adslot_mid tam on a.id=tam.adslot_id
+		<where>
+			tam.status=0 
+			<if test="slotMsspId != null">
+				and a.slot_mssp_id=#{slotMsspId}
+			</if>
+			<if test="termId != null">
+				and tam.term_id=#{termId}
+			</if>
+		</where> 
+	</select>
+	
+	<select id="getMaxTimesBySlotTypeCode" resultType="java.lang.Integer">
+		select 
+			ad_max_duration 
+		from 
+			ad_type_config
+		<where>
+			<if test="typeCode != null">
+				and ad_type_code=#{typeCode}
+			</if>
+		</where>
+	</select>
+
+	<!-- 计算时间提前15min(广告有效期结束时间) -->
+	<select id="getTerminalAdSlotPublishTotalTimeByTypeCode" resultType="java.lang.Integer">
+		select 
+			sum(bap.broadcast_time) 
+		from 
+			baidu_ad_publish bap 
+			left join baidu_ad ba on bap.ad_id=ba.id
+			where bap.term_id=#{termId} and ba.ad_type=#{typeCode} and bap.publish_status=0
+			<![CDATA[
+			and (
+				bap.start_date <= date_format(now(),'%Y-%m-%d')
+				and bap.start_time <= date_format(now(),'%H:%i:%s')
+				)
+			and (
+				 
+				(
+					bap.end_date = date_format(now(),'%Y-%m-%d')
+					and bap.end_time >= date_format(DATE_ADD(now(),INTERVAL 15 MINUTE),'%H:%i:%s')
+				) or (
+					bap.end_date > date_format(now(),'%Y-%m-%d')
+				)
+			)
+			]]>
+		group by 
+			ad_type
+	</select>
+
+</mapper>

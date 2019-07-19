@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vyin.baidu.mapper.BaiduMutualMapper">
+
+	<insert id="insertBaiduRequestContent" parameterType="java.util.Map">
+		insert into 
+			baidu_request_content
+			(request_id, req_content, parse_status, create_time)
+		values
+			(#{requestId}, #{reqContent}, #{parseStatus}, now())
+	</insert>
+
+	<insert id="insertBaiduRequestProto" parameterType="java.util.Map">
+		insert into 
+			baidu_request_proto
+			(request_id, req_proto, create_time)
+		values
+			(#{requestId}, #{reqProto}, now())
+	</insert>
+
+	<insert id="insertBaiduResponseProto" parameterType="java.util.Map">
+		insert into 
+			baidu_response_proto
+			(request_id, resp_proto, parse_status, create_time)
+		values
+			(#{requestId}, #{respProto}, #{parseStatus}, now())
+	</insert> 
+
+	<insert id="insertBaiduResponseContent" parameterType="java.util.Map">
+		insert into 
+			baidu_response_content
+			(request_id, resp_content, create_time)
+		values
+			(#{requestId}, #{respContent}, now())
+	</insert>
+	
+	<insert id="insertVyinReqJpData" parameterType="com.vyin.baidu.bean.JpRequestVo">
+		insert into 
+			jp_api_request 
+			(api_version, request_id, app_id, term_id, ad_slot_id, mutual_status, create_time)
+		values
+			(#{apiVersion}, #{requestId}, #{appId}, #{termId}, #{adSlotId}, #{mutualStatus}, now())
+	</insert>
+	
+	<insert id="insertBatchVyinReqJpData" parameterType="java.util.List">
+    	insert into 
+			jp_api_request 
+			(api_version, request_id, app_id, term_id, ad_slot_id, mutual_status, create_time)
+		values
+    <foreach collection ="list" item="item" separator =",">
+        (#{item.apiVersion}, #{item.requestId}, #{item.appId}, #{item.termId}, #{item.adSlotId}, #{item.mutualStatus}, now())
+    </foreach >
+	</insert>
+
+	<insert id="insertJpResponseData" parameterType="com.vyin.baidu.bean.JpRespInfoVo">
+		insert into 
+			jp_api_response 
+			(request_id, error_code, ad_slot_id, ad_ids, expiration_time, search_key, jp_adtext, jp_adlogo, create_time)
+		values
+			(#{requestId}, #{errorCode}, #{adSlotId}, #{adIds}, #{expirationTime}, #{searchKey}, #{jpAdtext}, #{jpAdlogo}, now())
+	</insert>
+
+	<select id="getJpRequestVoByReqId" resultType="com.vyin.baidu.bean.JpRequestVo">
+		select 
+			id, 
+			api_version apiVersion, 
+			request_id requestId, 
+			app_id appId, 
+			term_id termId, 
+			ad_slot_id adSlotId, 
+			mutual_status mutualStatus, 
+			create_time createTime 
+		from 
+			jp_api_request
+		<where>
+			<if test="requestId != null">
+				and request_id=#{requestId}
+			</if>
+		</where>
+	
+	</select>
+
+	<select id="getVyinReqData" resultType="com.vyin.baidu.bean.VyinReqInfoVo">
+		select 
+			ads.slot_mssp_id slotId, 
+			ads.slot_type slotType, 
+			ads.show_duration showDuration,  
+			atc.ad_max_duration maxTime 
+		from
+			ad_slots ads 
+		left join ad_type_config atc on atc.ad_type_code=ads.slot_type 
+		left join terminals_adslot_mid tam on ads.id=tam.adslot_id 
+		<where>
+			<if test="slotMsspId != null and slotMsspId != ''" >
+					and ads.slot_mssp_id=#{slotMsspId}
+			</if>
+			<if test="termId != null and termId != ''" >
+					and tam.term_id=#{termId} 
+			</if>
+			and tam.status=0 order by ads.show_duration desc
+		</where>
+	</select>
+	
+	<!-- 执行较慢导致lock wait，暂时不使用 -->
+	<update id="updateJpApiRequestMutualStatus" >
+		update 
+			jp_api_request 
+		set 
+			mutual_status=#{mutualStatus} 
+		where 
+			id=#{id}
+	</update>
+	
+	
+
+</mapper>

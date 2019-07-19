@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vyin.baidu.mapper.TerminalsMapper">
+
+	<!-- 默认参数待确定 -->
+	<select id="getAllTermId" resultType="com.vyin.baidu.bean.Terminals">
+		select
+			t.term_id termId,
+			bt.t_mac_id tMacId,
+			ifnull(bt.os_type_id, 3) osType,
+			ifnull(bt.os_version, '6.0.0') osVersion,
+			ifnull(bt.vendor, '未知产商名') vendor,
+			ifnull(t.model, '未知型号') model,
+			ifnull(bt.ipv4, '60.169.4.82') ipv4,
+			t.connection_type connectionType,
+			t.operator_type operatorType,
+			ifnull(ts.screen_width, '68.6') screenWidth,
+			ifnull(ts.screen_height, '38.6') screenHeight
+		from 
+			sync_ad_tmp sat left join terminals t on sat.term_id=t.term_id 
+			left join baidu_terminals bt on t.term_id=bt.term_id
+			left join terminals_screen_mid tsm on bt.term_id=tsm.term_id
+			left join terminals_screen_info ts on tsm.screen_id=ts.id group by t.term_id
+	</select>
+	
+	<select id="getTermIdsAll" resultType="com.vyin.baidu.bean.Terminals">
+		select
+			t.term_id termId,
+			bt.t_mac_id tMacId,
+			ifnull(bt.os_type_id, 3) osType,
+			ifnull(bt.os_version, '6.0.0') osVersion,
+			ifnull(bt.vendor, '未知产商名') vendor,
+			ifnull(t.model, '未知型号') model,
+			ifnull(bt.ipv4, '60.169.4.82') ipv4,
+			t.connection_type connectionType,
+			t.operator_type operatorType,
+			ifnull(ts.screen_width, '68.6') screenWidth,
+			ifnull(ts.screen_height, '38.6') screenHeight
+		from 
+			terminals t 
+			left join baidu_terminals bt on t.term_id=bt.term_id
+			left join terminals_screen_mid tsm on bt.term_id=tsm.term_id
+			left join terminals_screen_info ts on tsm.screen_id=ts.id 
+		group by t.term_id
+	</select>
+	
+	<select id="getTermInfoByTermId" resultType="com.vyin.baidu.bean.Terminals">
+		select
+			t.term_id termId,
+			bt.t_mac_id tMacId,
+			ifnull(bt.os_type_id, 3) osType,
+			ifnull(bt.os_version, '6.0.0') osVersion,
+			ifnull(bt.vendor, '未知产商名') vendor,
+			ifnull(t.model, '未知型号') model,
+			ifnull(bt.ipv4, '60.169.4.82') ipv4,
+			t.connection_type connectionType,
+			t.operator_type operatorType,
+			ifnull(ts.screen_width, '68.6') screenWidth,
+			ifnull(ts.screen_height, '38.6') screenHeight
+		from 
+			terminals t 
+			left join baidu_terminals bt on t.term_id=bt.term_id
+			left join terminals_screen_mid tsm on bt.term_id=tsm.term_id
+			left join terminals_screen_info ts on tsm.screen_id=ts.id 
+		where t.term_id=#{termId} 
+			group by t.term_id
+	</select>
+	
+	
+
+
+
+</mapper>

@@ -1,0 +1,13 @@
+#	聚屏请求接口url
+juping_req_url=https://jpad.baidu.com/api_6
+
+#	接口版本
+api_version=6.0.0
+
+#	资源方id
+app_id=c03dd227
+
+#	test
+image_local_path=/home/adsftp/
+appendDir=files/
+

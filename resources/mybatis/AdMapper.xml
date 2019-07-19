@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vyin.baidu.mapper.AdMapper">
+
+	<insert id="insertBaiduAdvertisementList" keyProperty="id" useGeneratedKeys="true" parameterType="java.util.List" >
+		insert into 
+			baidu_ad 
+			(title, ad_type, ad_status, win_notice_url, third_monitor_url, jp_ad_key, create_time)
+		values
+		<foreach collection ="list" item="item" separator =",">
+			(#{item.title}, #{item.adType}, #{item.adStatus}, #{item.winNoticeUrl}, #{item.thirdMonitorUrl}, #{item.jpAdKey}, now())
+		</foreach>
+	</insert>
+	
+	<insert id="insertBaiDuMaterialsList" parameterType="com.vyin.baidu.bean.BaiDuMaterials" >
+		insert into 
+			baidu_materials 
+			(ad_id, image_path, image_url, review_status, material_type_id, video_url, video_duration, material_width, material_height, material_size, material_md5, create_time) 
+		values 
+		<foreach collection ="list" item="item1" separator =",">
+			(#{item1.adId}, #{item1.imagePath}, #{item1.imageUrl}, #{item1.reviewStatus}, #{item1.materialTypeId}, #{item1.videoUrl}, #{item1.videoDuration}, #{item1.materialWidth}, #{item1.materialHeight}, #{item1.materialSize}, #{item1.materialMd5}, now())
+		</foreach>
+	</insert>
+	
+	<insert id="insertBaiDuAdPublishList" parameterType="com.vyin.baidu.bean.BaiduAdPublish" >
+		insert into 
+			baidu_ad_publish 
+			(term_id, ad_id, start_date, end_date, start_time, end_time, broadcast_time, publish_status, create_time) 
+		values 
+		<foreach collection ="list" item="item2" separator =",">
+			(#{item2.termId}, #{item2.adId}, #{item2.startDate}, #{item2.endDate}, #{item2.startTime}, #{item2.endTime}, #{item2.broadcastTime}, #{item2.publishStatus}, now())
+		</foreach>
+	</insert>
+	
+	<select id="getBaiduMaterialByImageMd5" resultType="com.vyin.baidu.bean.BaiDuMaterials">
+		select 
+			id, 
+			material_md5 materialMd5, 
+			image_path  imagePath 
+		from 
+			baidu_materials 
+		where 
+			material_md5=#{imageMd5} limit 1
+	</select>
+	
+	<!-- 暂时弃用 -->
+	<insert id="insertAdvertisement" keyProperty="id" useGeneratedKeys="true" parameterType="com.vyin.baidu.bean.Advertisement" >
+		insert into 
+			advertisement 
+			(title, ad_type, remarks, company_id, ad_source, ad_status, create_time)
+		values
+			(#{title}, #{adType}, #{remarks}, #{companyId}, #{adSource}, #{adStatus}, now())
+	</insert>
+	
+	<!-- 暂时弃用 -->
+	<insert id="insertJuPingAdvertisement" parameterType="com.vyin.baidu.bean.JpAd" >
+		insert into
+			jp_ad
+			(ad_id, win_notice_url, third_monitor_url, jp_ad_key, create_time)
+		values
+			(#{adId}, #{winNoticeUrl}, #{thirdMonitorUrl}, #{jpAdKey}, now())
+	</insert>
+	
+	<!-- 暂时弃用 -->
+	<insert id="insertAdMaterials" keyProperty="id" useGeneratedKeys="true" parameterType="com.vyin.baidu.bean.AdMaterials" >
+		insert into 
+			ad_materials 
+			(ad_id, image_path, image_url, review_status, create_time) 
+		values 
+			(#{adId}, #{imagePath}, #{imageUrl}, #{reviewStatus}, now())
+	
+	</insert>
+	
+	<!-- 暂时弃用 -->
+	<insert id="insertJpAdMaterials" parameterType="com.vyin.baidu.bean.JpAdMaterials" >
+		insert into 
+			jp_materials
+			(ad_id, ad_materials_id, material_type_id, video_url, video_duration, material_width, material_height, material_size, material_md5, create_time) 
+		values 
+			(#{adId}, #{adMaterialsId}, #{materialTypeId}, #{videoUrl}, #{videoDuration}, #{materialWidth}, #{materialHeight}, #{materialSize}, #{materialMd5}, now())
+	</insert>
+
+	<!-- 暂时弃用 -->
+	<insert id="insertAdPublish" parameterType="com.vyin.baidu.bean.AdPublish" >
+		insert into 
+			ad_publish 
+			(term_id, ad_id, start_date, end_date, start_time, end_time, broadcast_time, publish_status, order_id, create_time) 
+		values 
+			(#{termId}, #{adId}, #{startDate}, #{endDate}, #{startTime}, #{endTime}, #{broadcastTime}, #{publishStatus}, #{orderId}, now())
+	</insert>
+
+
+</mapper>

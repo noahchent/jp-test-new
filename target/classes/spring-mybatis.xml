@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+                        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd  
+                        http://www.springframework.org/schema/context  
+                        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                        http://www.springframework.org/schema/tx 
+		 				http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+                        http://www.springframework.org/schema/aop 
+					    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd  
+                        http://www.springframework.org/schema/mvc  
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+
+	<!-- 自动扫描 -->
+	<context:component-scan base-package="com.vyin.baidu.*" />
+	<context:property-placeholder location="classpath: *.properties" />
+	
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="driverClassName" value="${jdbc_mysql_driverClassName}" />
+		<property name="url" value="${jdbc_url}" />
+		<property name="username" value="${jdbc_username}" />
+		<property name="password" value="${jdbc_password}" />
+		<property name="filters" value="${jdbc_filters}" />
+		<property name="maxActive" value="${jdbc_maxActive}" />
+		<property name="initialSize" value="${jdbc_initialSize}" />
+		<property name="maxWait" value="${jdbc_maxWait}" />
+		<property name="minIdle" value="${jdbc_minIdle}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc_timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${jdbc_minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="${jdbc_validationQuery}" />
+		<property name="testWhileIdle" value="${jdbc_testWhileIdle}" />
+		<property name="testOnBorrow" value="${jdbc_testOnBorrow}" />
+		<property name="testOnReturn" value="${jdbc_testOnReturn}" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<!-- 是否缓存preparedStatement，也就是PSCache。 PSCache对支持游标的数据库性能提升巨大，比如说oracle。 
+			在mysql5.5以下的版本中没有PSCache功能，建议关闭掉。 5.5及以上版本有PSCache，建议开启。 -->
+		<property name="poolPreparedStatements" value="${jdbc_poolPreparedStatements}" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="${jdbc_maxPoolPreparedStatementPerConnectionSize}" />
+
+		<!-- 监控统计拦截的filters,日志记录 -->
+		<!-- 并在filters属性中配置了log4j -->
+		<property name="proxyFilters">
+			<list>
+				<ref bean="log-filter" />
+				<ref bean="stat-filter" />
+				<ref bean="wall-filter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="h2DataSource" class="com.alibaba.druid.pool.DruidDataSource"
+			init-method="init" destroy-method="close">
+		<property name="driverClassName" value="${jdbc_H2_driver}" />
+		<property name="url" value="${jdbc_H2_url}" />
+		<property name="username" value="${jdbc_H2_username}" />
+		<property name="password" value="${jdbc_H2_password}" />
+		
+	</bean>
+
+	<bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+		<property name="mergeSql" value="true" />
+		<property name="slowSqlMillis" value="1000" />
+		<property name="logSlowSql" value="true" />
+	</bean>
+
+	<bean id="wall-filter" class="com.alibaba.druid.wall.WallFilter">
+		<property name="dbType" value="mysql" />
+		<property name="logViolation" value="true" />
+		<property name="throwException" value="false" />
+	</bean>
+
+	<bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
+		<property name="statementLoggerName" value="sqlLogger" />
+	</bean>
+
+	<!--动态数据源的配置-->
+    <bean id="dynamicDataSource" class="com.vyin.baidu.utils.datasource.DynamicDataSource">
+        <property name="targetDataSources">
+            <map key-type="java.lang.String">
+                <entry value-ref="dataSource" key="dataSource"/>
+                <entry value-ref="h2DataSource" key="h2DataSource"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="dataSource">
+        </property>
+    </bean>
+
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dynamicDataSource" />
+		<!-- 自动扫描mapping.xml文件 -->
+		<property name="mapperLocations" value="classpath:mybatis/**/*.xml"></property>
+	</bean>
+
+	<!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.vyin.baidu.mapper,com.vyin.baidu.mapper.h2" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+
+	<!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="remove*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="create*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="query*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="modifly*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 配置aop 事务管理包 -->
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice"
+			pointcut="execution(* com.vyin.baidu.service.*.*(..))" />
+	</aop:config>
+
+
+
+</beans>
