@@ -26,7 +26,7 @@
 	</task:scheduled-tasks>   -->
 	<task:scheduled-tasks>   
 	<!--  每20秒执行一次 -->
-	         <task:scheduled ref="terminalsH2Task" method="updataTermIdInfo" cron="0/20 * * * * *"/>
+	         <task:scheduled ref="terminalsH2Task" method="updataTermIdInfo" cron="0/5 * * * * *"/>
 	<!--  每1个小时执行一次 -->      
 	         <!-- <task:scheduled ref="terminalsH2Task" method="updataTermIdInfo" cron="0 0 0/1 * * ?"/> -->
 	</task:scheduled-tasks>
